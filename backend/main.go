@@ -1,0 +1,106 @@
+package main
+
+import (
+	"fmt"
+	"math/big"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+)
+
+const (
+	minBlocksToEstimate = 10
+)
+
+var (
+	collector          headCollector
+	velocityCalculator difficultyVelocityCalculator
+)
+
+func init() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339})
+}
+
+func main() {
+	headRecvNotifChan := make(chan *types.Header, 10)
+
+	// TODO: Should be singleton.
+	collector = headCollector{}
+	collector.Start(headRecvNotifChan)
+
+	velocityCalculator = difficultyVelocityCalculator{}
+	velocityCalculator.Start(headRecvNotifChan)
+
+	e := echo.New()
+	e.GET("/difficulty", diffHandler)
+	e.GET("/stat", statHandler)
+
+	if err := e.Start("0.0.0.0:9090"); err != nil {
+		collector.Stop()
+		panic(err)
+	}
+}
+
+func diffHandler(c echo.Context) error {
+	log.Info().Str("main", "diffHandler").Msg("call")
+
+	if c.QueryParam("target") == "" {
+		return c.String(http.StatusBadRequest, "need target parameter")
+	}
+
+	if len(collector.GetEthHeaders()) < minBlocksToEstimate {
+		return c.String(http.StatusNoContent, "not ready")
+	}
+
+	lastEthHeader := collector.GetLastEthHeader()
+	if lastEthHeader == nil {
+		return c.String(http.StatusInternalServerError, "can't get last header")
+	}
+
+	targetDifficulty, ok := new(big.Int).SetString(c.QueryParam("target"), 10)
+	if !ok {
+		return c.String(http.StatusBadRequest, "invalid target difficulty number format")
+	}
+
+	// TODO: Handle past..
+
+	curDifficulty := collector.GetLastTotalDifficulty()
+	if curDifficulty == nil {
+		return c.String(http.StatusInternalServerError, "can't get last difficulty")
+	}
+
+	distance := new(big.Int).Sub(targetDifficulty, curDifficulty)
+	expectBlocks := new(big.Int).Div(distance, velocityCalculator.velocity)
+
+	const ethBlockInterval = 16 * time.Second
+	now := time.Now().UTC()
+	expectTTDTime := now.Add(ethBlockInterval * time.Duration(expectBlocks.Int64()))
+
+	respBody := struct {
+		TargetDifficulty     *big.Int  `json:"target_difficulty"`
+		DifficultyVelocity   *big.Int  `json:"difficulty_velocity"`
+		CurrentBlockNumber   *big.Int  `json:"current_block_number"`
+		ExpectTTDBlockNumber *big.Int  `json:"expect_ttd_block_number"`
+		ExpectTTDTime        time.Time `json:"expect_ttd_time"`
+	}{
+		TargetDifficulty:     targetDifficulty,
+		DifficultyVelocity:   velocityCalculator.velocity, // TODO: wrap
+		CurrentBlockNumber:   lastEthHeader.Number,
+		ExpectTTDBlockNumber: new(big.Int).Add(lastEthHeader.Number, expectBlocks),
+		ExpectTTDTime:        expectTTDTime,
+	}
+
+	return c.JSON(http.StatusOK, respBody)
+}
+
+func statHandler(c echo.Context) error {
+	fmt.Println("Statistics")
+	fmt.Printf("Total %d headers\n", len(collector.GetEthHeaders()))
+
+	return c.String(http.StatusOK, "OK")
+}
