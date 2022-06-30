@@ -101,6 +101,15 @@ func diffHandler(c echo.Context) error {
 func statHandler(c echo.Context) error {
 	fmt.Println("Statistics")
 	fmt.Printf("Total %d headers\n", len(collector.GetEthHeaders()))
+	fmt.Printf("Total %d diff\n", len(collector.totalDifficulty))
+
+	// TODO: Handle by response.
+	for _, h := range collector.GetEthHeaders() {
+		difficulty := h.Difficulty
+		totalDifficulty := collector.totalDifficulty[h.Number.Text(10)]
+
+		fmt.Println(h.Number, difficulty, totalDifficulty)
+	}
 
 	return c.String(http.StatusOK, "OK")
 }

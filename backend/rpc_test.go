@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/big"
 	"testing"
-	"time"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -34,13 +33,4 @@ func TestGetBlockByNumber(t *testing.T) {
 	fmt.Println(block.Number(), block.Header().Hash())
 
 	_ = err
-}
-
-func TestHeadReceiver(t *testing.T) {
-	c := headCollector{}
-	c.Start()
-
-	time.Sleep(time.Second * 60)
-
-	c.Stop()
 }

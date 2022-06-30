@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"sync"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,4 +43,17 @@ func TestSubBigInt(t *testing.T) {
 	z = z.Sub(x, y)
 
 	fmt.Println(z)
+}
+
+func TestFetchAhead(t *testing.T) {
+	collector := headCollector{
+		ethHeaders:      make([]*types.Header, 0),
+		totalDifficulty: map[string]*big.Int{},
+		headerLock:      sync.Mutex{},
+		difficultyLock:  sync.Mutex{},
+		termChan:        make(chan bool, 1),
+	}
+
+	blockNo := big.NewInt(1000000)
+	collector.fetchAheadHeaders(blockNo, 10)
 }
