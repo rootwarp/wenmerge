@@ -9,6 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -39,6 +40,8 @@ func main() {
 	e := echo.New()
 	e.GET("/difficulty", diffHandler)
 	e.GET("/stat", statHandler)
+
+	e.Use(middleware.CORS())
 
 	if err := e.Start("0.0.0.0:9090"); err != nil {
 		collector.Stop()
