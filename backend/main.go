@@ -80,22 +80,34 @@ func diffHandler(c echo.Context) error {
 	distance := new(big.Int).Sub(targetDifficulty, curDifficulty)
 	expectBlocks := new(big.Int).Div(distance, velocityCalculator.velocity)
 
-	const ethBlockInterval = 16 * time.Second
+	firstEthHeader := collector.GetEthHeaders()[0]
+	diffBlockNo := new(big.Int).Sub(lastEthHeader.Number, firstEthHeader.Number).Uint64()
+	avgBlockInterval := (lastEthHeader.Time - firstEthHeader.Time) / diffBlockNo
+
+	var ethBlockInterval = time.Duration(avgBlockInterval) * time.Second
 	now := time.Now().UTC()
 	expectTTDTime := now.Add(ethBlockInterval * time.Duration(expectBlocks.Int64()))
 
+	fmt.Println(diffBlockNo, (lastEthHeader.Time - firstEthHeader.Time), avgBlockInterval)
+
 	respBody := struct {
-		TargetDifficulty     *big.Int  `json:"target_difficulty"`
-		DifficultyVelocity   *big.Int  `json:"difficulty_velocity"`
-		CurrentBlockNumber   *big.Int  `json:"current_block_number"`
-		ExpectTTDBlockNumber *big.Int  `json:"expect_ttd_block_number"`
-		ExpectTTDTime        time.Time `json:"expect_ttd_time"`
+		CurrentBlockNumber    *big.Int  `json:"current_block_number"`
+		CurrentDifficulty     *big.Int  `json:"current_difficulty"`
+		CurrentBlockTimestamp time.Time `json:"current_block_timestamp"`
+		TargetDifficulty      *big.Int  `json:"target_difficulty"`
+		DifficultyVelocity    *big.Int  `json:"difficulty_velocity"`
+		ExpectTTDBlockNumber  *big.Int  `json:"expect_ttd_block_number"`
+		ExpectTTDTime         time.Time `json:"expect_ttd_time"`
+		AverageBlockInterval  uint64    `json:"average_block_interval"`
 	}{
-		TargetDifficulty:     targetDifficulty,
-		DifficultyVelocity:   velocityCalculator.velocity, // TODO: wrap
-		CurrentBlockNumber:   lastEthHeader.Number,
-		ExpectTTDBlockNumber: new(big.Int).Add(lastEthHeader.Number, expectBlocks),
-		ExpectTTDTime:        expectTTDTime,
+		CurrentBlockNumber:    lastEthHeader.Number,
+		CurrentDifficulty:     lastEthHeader.Difficulty,
+		CurrentBlockTimestamp: time.Unix(int64(lastEthHeader.Time), 0),
+		TargetDifficulty:      targetDifficulty,
+		DifficultyVelocity:    velocityCalculator.velocity, // TODO: wrap
+		ExpectTTDBlockNumber:  new(big.Int).Add(lastEthHeader.Number, expectBlocks),
+		ExpectTTDTime:         expectTTDTime,
+		AverageBlockInterval:  avgBlockInterval,
 	}
 
 	return c.JSON(http.StatusOK, respBody)

@@ -91,7 +91,7 @@ func (h *headCollector) headReceiver(termChan <-chan bool, headRecvNotifChan cha
 				h.totalDifficulty[ethHeader.Number.Text(10)] = block.TotalDifficulty
 				h.difficultyLock.Unlock()
 
-				go h.fetchAheadHeaders(ethHeader.Number, 10)
+				go h.fetchAheadHeaders(ethHeader.Number, 50)
 			} else {
 				prevBlockNo := new(big.Int).Sub(ethHeader.Number, big.NewInt(1))
 				prevTotalDifficulty := h.totalDifficulty[prevBlockNo.Text(10)]
