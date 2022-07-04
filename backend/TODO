@@ -1,0 +1,12 @@
+# TODOs
+
+- [X] Dockerfile
+- [X] Boost load when instance loaded.
+- [ ] Verify calculation. 
+- [X] CORS
+- [ ] Frontend.
+- [ ] Calculate block time and apply to TTD estimation.
+- [ ] Add additional block info
+ - current difficulty.
+ - block time.
+ - time.

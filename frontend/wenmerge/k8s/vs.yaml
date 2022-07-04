@@ -1,0 +1,46 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vs-wenmerge-frontend
+  namespace: wenmerge
+
+spec:
+  hosts:
+  - "wenmerge.dsrvlabs.dev"
+  gateways:
+  - gw-wenmerge
+  http:
+  - route:
+    - destination:
+        host: svc-wenmerge-frontend.wenmerge.svc.cluster.local
+      weight: 100
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: gw-wenmerge
+  namespace: wenmerge
+
+spec:
+  selector:
+    istio: ingress
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "wenmerge.dsrvlabs.dev"
+    - "api-wenmerge.dsrvlabs.dev"
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: secret-dsrvlabs-tls
+    hosts:
+    - "wenmerge.dsrvlabs.dev"
+    - "api-wenmerge.dsrvlabs.dev"

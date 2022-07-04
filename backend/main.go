@@ -38,17 +38,18 @@ func main() {
 	velocityCalculator.Start(headRecvNotifChan)
 
 	e := echo.New()
-	e.GET("/difficulty", diffHandler)
-	e.GET("/stat", statHandler)
 
 	corsConfig := middleware.CORSConfig{
 		Skipper:      middleware.DefaultSkipper,
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch, http.MethodOptions, http.MethodHead},
-		AllowHeaders: []string{"Authorization", "Content-Type"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}
 
 	e.Use(middleware.CORSWithConfig(corsConfig))
+
+	e.GET("/difficulty", diffHandler)
+	e.GET("/stat", statHandler)
 
 	if err := e.Start("0.0.0.0:9090"); err != nil {
 		collector.Stop()

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wenmerge-frontend
+  namespace: wenmerge
+
+spec:
+  selector:
+    matchLabels:
+      app: wenmerge-frontend
+  replicas: 1
+  template:
+    metadata:
+      # annotations:
+      #   sidecar.istio.io/inject: "false"
+      labels:
+        app: wenmerge-frontend
+    spec:
+      containers:
+      - name: backend
+        image: rootwarp/wenmerge-frontend:latest
+        ports:
+        - containerPort: 3000

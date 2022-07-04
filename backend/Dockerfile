@@ -5,7 +5,7 @@ WORKDIR /app
 ADD . .
 
 RUN go mod tidy
-RUN CGO_ENABLE=0 go build -ldflags '-extldflags "-static"'
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLE=0 go build -ldflags '-extldflags "-static"'
 
 # Exec. stage.
 FROM alpine:3.16.0

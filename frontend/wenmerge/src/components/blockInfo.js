@@ -111,7 +111,7 @@ const BlockInfo = () => {
 
                 <div className='blockinfo_list'>
                     {
-                        ttdStates.reverse().map(item => {
+                        ttdStates.map(item => {
                             return(
                                 <div key={ item.current_block_number } className='blockinfo__detail'>
                                     <div>{ numberWithCommas(item.current_block_number) }</div>

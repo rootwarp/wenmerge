@@ -1,6 +1,6 @@
 export const getDifficalty = (target, cb) => {
     console.log('getDifficalty');
-    const url = `http://localhost:9090/difficulty?target=${target}`;
+    const url = `https://api-wenmerge.dsrvlabs.dev/difficulty?target=${target}`;
 
     fetch(url)
         .then(resp => resp.json())
