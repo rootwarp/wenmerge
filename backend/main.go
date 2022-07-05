@@ -41,7 +41,14 @@ func main() {
 	e.GET("/difficulty", diffHandler)
 	e.GET("/stat", statHandler)
 
-	e.Use(middleware.CORS())
+	corsConfig := middleware.CORSConfig{
+		Skipper:      middleware.DefaultSkipper,
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch, http.MethodOptions, http.MethodHead},
+		AllowHeaders: []string{"Authorization", "Content-Type"},
+	}
+
+	e.Use(middleware.CORSWithConfig(corsConfig))
 
 	if err := e.Start("0.0.0.0:9090"); err != nil {
 		collector.Stop()
