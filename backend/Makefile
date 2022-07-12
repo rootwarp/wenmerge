@@ -2,4 +2,4 @@ build:
 	go build
 
 image:
-	docker build -t wenmerge .
+	docker build --platform linux/amd64 -t wenmerge-backend .

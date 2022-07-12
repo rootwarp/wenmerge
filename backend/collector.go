@@ -106,6 +106,23 @@ func (h *headCollector) headReceiver(termChan <-chan bool, headRecvNotifChan cha
 
 			logMsg := fmt.Sprintf("%d | %d | %d", ethHeader.Number, ethHeader.Difficulty, h.totalDifficulty[ethHeader.Number.Text(10)])
 			log.Info().Str("main", "headReceiver").Msg(fmt.Sprintf(logMsg))
+
+		case err := <-sub.Err():
+			log.Error().Str("module", "main").Msg(err.Error())
+
+			cli, err = ethclient.Dial(wssURL)
+			if err != nil {
+				log.Error().Str("main", "headReceiver").Msg(err.Error())
+				return err
+			}
+
+			sub, err = cli.SubscribeNewHead(ctx, headChan)
+			if err != nil {
+				log.Error().Str("main", "headReceiver").Msg(err.Error())
+				return err
+			}
+
+			continue
 		case _ = <-termChan:
 			log.Warn().Str("main", "headReceiver").Msg("terminate")
 			break
