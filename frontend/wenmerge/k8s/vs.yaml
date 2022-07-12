@@ -6,7 +6,7 @@ metadata:
 
 spec:
   hosts:
-  - "wenmerge.dsrvlabs.dev"
+  - "wenmerge-msf9.dsrvlabs.dev"
   gateways:
   - gw-wenmerge
   http:
@@ -30,7 +30,7 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "wenmerge.dsrvlabs.dev"
+    - "wenmerge-msf9.dsrvlabs.dev"
     - "api-wenmerge.dsrvlabs.dev"
     tls:
       httpsRedirect: true
@@ -42,5 +42,5 @@ spec:
       mode: SIMPLE
       credentialName: secret-dsrvlabs-tls
     hosts:
-    - "wenmerge.dsrvlabs.dev"
+    - "wenmerge-msf9.dsrvlabs.dev"
     - "api-wenmerge.dsrvlabs.dev"

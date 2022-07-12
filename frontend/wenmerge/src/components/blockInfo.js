@@ -3,7 +3,7 @@ import { React, useEffect, useState } from 'react';
 import { getDifficalty } from '../lib/difficulty';
 import "./blockInfo.css"
 
-const TARGET = '53290823313153069154304';
+const TARGET = '53945568722258575228928';
 const MAX_BLOCK_ENTRIES = 20;
 
 const numberWithCommas = (x) => {
