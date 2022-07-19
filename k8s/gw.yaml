@@ -15,6 +15,7 @@ spec:
     hosts:
     - "api-wenmerge.dsrvlabs.dev"
     - "api-wenmerge-goerli.dsrvlabs.dev"
+    - "wenmerge.dsrvlabs.dev"
     tls:
       httpsRedirect: true
   - port:
@@ -27,3 +28,4 @@ spec:
     hosts:
     - "api-wenmerge.dsrvlabs.dev"
     - "api-wenmerge-goerli.dsrvlabs.dev"
+    - "wenmerge.dsrvlabs.dev"

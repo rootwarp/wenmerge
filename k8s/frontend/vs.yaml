@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vs-wenmerge-frontend
+  namespace: wenmerge
+
+spec:
+  hosts:
+  - "wenmerge.dsrvlabs.dev"
+  gateways:
+  - gw-wenmerge
+  http:
+  - route:
+    - destination:
+        host: svc-wenmerge-frontend.wenmerge.svc.cluster.local
+      weight: 100
