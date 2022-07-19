@@ -1,6 +1,6 @@
-export const getDifficalty = (target, cb) => {
+export const getDifficalty = (rpc, target, cb) => {
     console.log('getDifficalty');
-    const url = `https://api-wenmerge.dsrvlabs.dev/difficulty?target=${target}`;
+    const url = `${rpc}/difficulty?target=${target}`;
 
     fetch(url)
         .then(resp => resp.json())

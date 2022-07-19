@@ -3,8 +3,7 @@ import { React, useEffect, useState } from 'react';
 import { getDifficalty } from '../lib/difficulty';
 import "./blockInfo.css"
 
-const TARGET = '53945568722258575228928';
-const MAX_BLOCK_ENTRIES = 20;
+const MAX_BLOCK_ENTRIES = 5;
 
 const numberWithCommas = (x) => {
     if(x == null) {
@@ -14,7 +13,7 @@ const numberWithCommas = (x) => {
     }
 }
 
-const BlockInfo = () => {
+const BlockInfo = (props) => {
     const [ ttd, setTTDState ] = useState({
         target_difficulty: null,
         difficulty_velocity: null,
@@ -25,10 +24,12 @@ const BlockInfo = () => {
 
     const [ttdStates, setTTDStates] = useState([]);
 
+    const { title, target_ttd, rpc } = props;
+
     useEffect(() => {
         console.log('useEffect');
         const timer = setInterval(() => {
-            getDifficalty(TARGET, d => {
+            getDifficalty(rpc, target_ttd, d => {
                 setTTDState({
                     target_difficulty: d.target_difficulty,
                     difficulty_velocity: d.difficulty_velocity,
@@ -62,7 +63,7 @@ const BlockInfo = () => {
     return (
         <div className='wenmerge_container'>
             <div className='title_container'>
-                <div className='title__name'>wenmerge?</div>
+                <div className='title__name'>{ title == null ? "--" : title }</div>
             </div>
 
             <div className='summary_container'>

@@ -8,10 +8,12 @@ div {
 }
 
 .title__name {
-    margin: 20px 0px 20px 0px;
+    margin: 20px 10px 20px 10px;
 
-    font-size: 20pt;
+    font-size: 14pt;
     font-weight: bold;
+
+    text-align: left;
 }
 
 .summary_container {

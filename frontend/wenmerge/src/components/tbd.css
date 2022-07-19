@@ -1,0 +1,18 @@
+.tbd_container {
+    display: flex;
+    flex-direction: column;
+}
+
+.tbd__title {
+    margin: 20px 10px 20px 10px;
+
+    font-size: 14pt;
+    font-weight: bold;
+
+    text-align: left;
+}
+
+.tbd__msg {
+    margin: 0px 30px 0px 30px;
+    text-align: left;
+}
