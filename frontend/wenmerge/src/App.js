@@ -7,9 +7,9 @@ function App() {
   return (
     <div className="App">
       <h className='App__title'>wenmerge?</h>
-      <TBD title="mainnet"></TBD>
-      <BlockInfo title="goerli shadow fork" target_ttd="10627192" rpc="https://api-wenmerge-goerli.dsrvlabs.dev"></BlockInfo>
+      <BlockInfo title="GSF5 - goerli shadow fork" target_ttd="10625003" rpc="https://api-wenmerge-goerli.dsrvlabs.dev"></BlockInfo>
       <BlockInfo title="goerli merge" target_ttd="10790000" rpc="https://api-wenmerge-goerli.dsrvlabs.dev"></BlockInfo>
+      <TBD title="mainnet"></TBD>
     </div>
   );
 }
