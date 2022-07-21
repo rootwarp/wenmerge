@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blockfetcher
+  namespace: wenmerge
+
+spec:
+  selector:
+    matchLabels:
+      app: blockfetcher
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: blockfetcher
+    spec:
+      containers:
+      - name: fetcher
+        image: rootwarp/blockfetcher:v0.2.0
+        env:
+        - name: ETH_RPC_URL
+          valueFrom:
+            secretKeyRef:
+              name: rpc-endpoints
+              key: ETH_RPC_URL
+        - name: ETH_WSS_URL
+          valueFrom:
+            secretKeyRef:
+              name: rpc-endpoints
+              key: ETH_WSS_URL
+        - name: REDIS_ADDR
+          #value: svc-redis.wenmerge.svc.cluster.local:6379
+          value: 172.20.102.188:6379

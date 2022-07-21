@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blockfetcher-goerli
+  namespace: wenmerge
+
+spec:
+  selector:
+    matchLabels:
+      app: blockfetcher-goerli
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: blockfetcher-goerli
+    spec:
+      containers:
+      - name: fetcher
+        image: rootwarp/blockfetcher:v0.2.0
+        env:
+        - name: ETH_RPC_URL
+          valueFrom:
+            secretKeyRef:
+              name: rpc-goerli-endpoints
+              key: ETH_GOERLI_RPC_URL
+        - name: ETH_WSS_URL
+          valueFrom:
+            secretKeyRef:
+              name: rpc-goerli-endpoints
+              key: ETH_GOERLI_WSS_URL
+        - name: REDIS_ADDR
+          value: 172.20.26.251:6379
