@@ -10,6 +10,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/go-redis/redis/v9"
+	"github.com/rs/zerolog/log"
+)
+
+const (
+	keyLatestBlockNo = "latest_block_no"
 )
 
 type redisStore struct {
@@ -17,6 +22,8 @@ type redisStore struct {
 }
 
 func (s *redisStore) Store(ctx context.Context, blockNo *big.Int, header *types.Header) error {
+	log.Info().Str("module", "redis").Msgf("store %s", blockNo.String())
+
 	hexInfo, err := s.encode(header)
 	if err != nil {
 		return err
@@ -45,6 +52,8 @@ func (s *redisStore) encode(header *types.Header) (string, error) {
 }
 
 func (s *redisStore) Get(ctx context.Context, blockNo *big.Int) (*types.Header, error) {
+	log.Info().Str("module", "redis").Msgf("get %s", blockNo.String())
+
 	value, err := s.client.Get(ctx, blockNo.String()).Result()
 	if err != nil {
 		return nil, err
@@ -69,6 +78,21 @@ func (s *redisStore) decode(encoded string) (*types.Header, error) {
 	}
 
 	return &info, nil
+}
+
+func (s *redisStore) SetLatestHeader(ctx context.Context, blockNo *big.Int, header *types.Header) error {
+	log.Info().Str("module", "redis").Msgf("set latest %s", blockNo.String())
+	err := s.client.Set(ctx, keyLatestBlockNo, blockNo.String(), 0).Err()
+	if err != nil {
+		return err
+	}
+
+	err = s.Store(ctx, blockNo, header)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *redisStore) Latest(ctx context.Context) (*types.Header, error) {

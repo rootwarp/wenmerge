@@ -11,10 +11,12 @@ import (
 type BlockHeaderStore interface {
 	Store(ctx context.Context, blockNo *big.Int, header *types.Header) error
 	Get(ctx context.Context, blockNo *big.Int) (*types.Header, error)
+
+	SetLatestHeader(ctx context.Context, blockNo *big.Int, header *types.Header) error
 	Latest(ctx context.Context) (*types.Header, error)
 }
 
 // NewClient creates persistent layer client.
-func NewClient() BlockHeaderStore {
-	return newRedisClient("localhost:6379")
+func NewClient(addr string) BlockHeaderStore {
+	return newRedisClient(addr)
 }

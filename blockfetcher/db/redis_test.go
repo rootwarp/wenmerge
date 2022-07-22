@@ -15,6 +15,7 @@ import (
 // TODO: Get latest.
 // TODO: Sort
 // TODO: Mock test.
+// TODO: Check empty value.
 
 // TODO: Sort by big.int?
 
@@ -28,11 +29,11 @@ func TestRedisSet(t *testing.T) {
 	store := newRedisClient("localhost:6379")
 
 	// Connect
-	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
-	})
+	//rdb := redis.NewClient(&redis.Options{
+	//	Addr: "localhost:6379",
+	//})
 
-	defer rdb.Close()
+	//defer rdb.Close()
 
 	// Store
 	header := &types.Header{
@@ -54,6 +55,41 @@ func TestRedisSet(t *testing.T) {
 	assert.Equal(t, header.Coinbase.String(), getHeader.Coinbase.String())
 	assert.Equal(t, header.Difficulty.String(), getHeader.Difficulty.String())
 	assert.Equal(t, header.Time, getHeader.Time)
+}
+
+func TestLatest(t *testing.T) {
+	store := newRedisClient("localhost:6379")
+
+	// dummy info.
+	header := &types.Header{
+		Coinbase:   common.HexToAddress("12345"),
+		Number:     big.NewInt(1234),
+		Difficulty: big.NewInt(56789),
+		Time:       uint64(time.Now().Unix()),
+	}
+
+	// Set
+	ctx := context.Background()
+	err := store.SetLatestHeader(ctx, header.Number, header)
+
+	assert.Nil(t, err)
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+	defer rdb.Close()
+
+	// Check latest block number value.
+	latestBlockNo, err := rdb.Get(ctx, keyLatestBlockNo).Result()
+
+	assert.Nil(t, err)
+	assert.Equal(t, header.Number.String(), latestBlockNo)
+
+	// Read real header.
+	recvHeader, err := store.Get(ctx, header.Number)
+
+	assert.Nil(t, err)
+	assert.Equal(t, header.Number.String(), recvHeader.Number.String())
 }
 
 func TestGob(t *testing.T) {
