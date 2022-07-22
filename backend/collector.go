@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -47,7 +48,19 @@ func (h *headCollector) Start(headRecvNotifChan chan<- *types.Header) {
 
 	h.termChan = make(chan bool, 1)
 
-	go h.headReceiver(h.termChan, headRecvNotifChan)
+	ticker := time.NewTicker(time.Second * 60)
+
+	go func() {
+		go h.headReceiver(h.termChan, headRecvNotifChan)
+
+		for t := range ticker.C {
+			h.termChan <- true
+			time.Sleep(time.Second * 1)
+
+			go h.headReceiver(h.termChan, headRecvNotifChan)
+			_ = t
+		}
+	}()
 }
 
 func (h *headCollector) headReceiver(termChan <-chan bool, headRecvNotifChan chan<- *types.Header) error {
@@ -125,7 +138,7 @@ func (h *headCollector) headReceiver(termChan <-chan bool, headRecvNotifChan cha
 			continue
 		case _ = <-termChan:
 			log.Warn().Str("main", "headReceiver").Msg("terminate")
-			break
+			return nil
 		}
 	}
 }
