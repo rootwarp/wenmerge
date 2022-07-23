@@ -88,11 +88,13 @@ func (s *redisStore) SetLatestHeader(ctx context.Context, blockNo *big.Int, head
 
 	err := s.client.Set(ctx, keyLatestBlockNo, blockNo.String(), 0).Err()
 	if err != nil {
+		log.Error().Str("module", "redis").Msgf(err.Error())
 		return err
 	}
 
 	err = s.Store(ctx, blockNo, header)
 	if err != nil {
+		log.Error().Str("module", "redis").Msgf(err.Error())
 		return err
 	}
 
@@ -100,8 +102,27 @@ func (s *redisStore) SetLatestHeader(ctx context.Context, blockNo *big.Int, head
 }
 
 func (s *redisStore) Latest(ctx context.Context) (*types.Header, error) {
-	// TODO:
-	return nil, nil
+	log.Info().Str("module", "redis").Msgf("latest")
+
+	blockNoStr, err := s.client.Get(ctx, keyLatestBlockNo).Result()
+	if err != nil {
+		log.Error().Str("module", "redis").Msgf(err.Error())
+		return nil, err
+	}
+
+	blockNo, ok := big.NewInt(0).SetString(blockNoStr, 10)
+	if !ok {
+		log.Error().Str("module", "redis").Msgf("cannot convert to big integer")
+		return nil, errors.New("cannot convert to big integer")
+	}
+
+	header, err := s.Get(ctx, blockNo)
+	if err != nil {
+		log.Error().Str("module", "redis").Msgf(err.Error())
+		return nil, err
+	}
+
+	return header, nil
 }
 
 func (s *redisStore) GetTotalDifficulty(ctx context.Context, blockNo *big.Int) (*big.Int, error) {

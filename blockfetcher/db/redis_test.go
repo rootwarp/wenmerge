@@ -110,6 +110,32 @@ func TestEmpty(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestGetLatest(t *testing.T) {
+	// Set dummies.
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
+	store := newRedisClient("localhost:6379")
+
+	// Store
+	header := &types.Header{
+		Coinbase:   common.HexToAddress("12345"),
+		Number:     big.NewInt(1234),
+		Difficulty: big.NewInt(56789),
+		Time:       uint64(time.Now().Unix()),
+	}
+
+	_ = store.Store(ctx, header.Number, header)
+	rdb.Set(ctx, keyLatestBlockNo, header.Number.String(), 0)
+
+	// Get
+	readHeader, err := store.Latest(ctx)
+
+	// Asserts
+	assert.Nil(t, err)
+	assert.Equal(t, header.Number.String(), readHeader.Number.String())
+	assert.Equal(t, header.Difficulty.String(), readHeader.Difficulty.String())
+}
+
 func TestGob(t *testing.T) {
 	store := redisStore{}
 
