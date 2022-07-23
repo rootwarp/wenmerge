@@ -14,6 +14,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/rootwarp/wenmerge/blockfetcher/db"
+	"github.com/rootwarp/wenmerge/blockfetcher/rpc"
 )
 
 var (
@@ -51,17 +52,17 @@ func (h *headerReceiver) Start(headRecvNotifChan chan<- *types.Header) {
 
 	ticker := time.NewTicker(time.Second * 60)
 
-	go h.headReceiver(h.termChan, headRecvNotifChan)
+	go h.headReceiver(h.termChan)
 	for t := range ticker.C {
 		h.termChan <- true
 		time.Sleep(time.Second * 1)
 
-		go h.headReceiver(h.termChan, headRecvNotifChan)
+		go h.headReceiver(h.termChan)
 		_ = t
 	}
 }
 
-func (h *headerReceiver) headReceiver(termChan <-chan bool, headRecvNotifChan chan<- *types.Header) error {
+func (h *headerReceiver) headReceiver(termChan <-chan bool) error {
 	log.Info().Str("module", "receiver").Msg("start headReceiver")
 
 	cli, err := ethclient.Dial(wssURL)
@@ -80,6 +81,8 @@ func (h *headerReceiver) headReceiver(termChan <-chan bool, headRecvNotifChan ch
 
 	defer sub.Unsubscribe()
 
+	rpcCli := rpc.NewClient()
+
 	for {
 		select {
 		case ethHeader := <-headChan:
@@ -91,10 +94,17 @@ func (h *headerReceiver) headReceiver(termChan <-chan bool, headRecvNotifChan ch
 				continue
 			}
 
-			headRecvNotifChan <- ethHeader
+			block, err := rpcCli.GetBlockByNumber(ethHeader.Number)
+			if err != nil {
+				log.Error().Str("module", "receiver").Msg(err.Error())
+				continue
+			}
 
-			// TODO: Save total difficulty
-			//
+			err = h.store.SetTotalDifficulty(ctx, ethHeader.Number, block.TotalDifficulty)
+			if err != nil {
+				log.Error().Str("module", "receiver").Msg(err.Error())
+				continue
+			}
 		case err := <-sub.Err():
 			log.Error().Str("module", "receiver").Msg(err.Error())
 

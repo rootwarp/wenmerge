@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/gob"
 	"encoding/hex"
+	"errors"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -14,7 +16,8 @@ import (
 )
 
 const (
-	keyLatestBlockNo = "latest_block_no"
+	keyLatestBlockNo         = "latest_block_no"
+	keyTotalDifficultyPrefix = "td_"
 )
 
 type redisStore struct {
@@ -82,6 +85,7 @@ func (s *redisStore) decode(encoded string) (*types.Header, error) {
 
 func (s *redisStore) SetLatestHeader(ctx context.Context, blockNo *big.Int, header *types.Header) error {
 	log.Info().Str("module", "redis").Msgf("set latest %s", blockNo.String())
+
 	err := s.client.Set(ctx, keyLatestBlockNo, blockNo.String(), 0).Err()
 	if err != nil {
 		return err
@@ -98,6 +102,36 @@ func (s *redisStore) SetLatestHeader(ctx context.Context, blockNo *big.Int, head
 func (s *redisStore) Latest(ctx context.Context) (*types.Header, error) {
 	// TODO:
 	return nil, nil
+}
+
+func (s *redisStore) GetTotalDifficulty(ctx context.Context, blockNo *big.Int) (*big.Int, error) {
+	log.Info().Str("module", "redis").Msgf("get total difficulty %s", blockNo.String())
+
+	difficulty, err := s.client.Get(ctx, keyTotalDifficultyPrefix+blockNo.String()).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	value, ok := big.NewInt(0).SetString(difficulty, 10)
+	if !ok {
+		return nil, errors.New("cannot convert to big integer")
+	}
+
+	return value, nil
+}
+
+func (s *redisStore) SetTotalDifficulty(ctx context.Context, blockNo *big.Int, totalDifficulty *big.Int) error {
+	log.Info().Str("module", "redis").Msgf("set total difficulty %s %s", blockNo.String(), totalDifficulty.String())
+
+	const expiration = time.Hour * 24 * 7
+
+	fmt.Println(keyTotalDifficultyPrefix+blockNo.String(), totalDifficulty.String())
+	err := s.client.Set(ctx, keyTotalDifficultyPrefix+blockNo.String(), totalDifficulty.String(), expiration).Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func newRedisClient(addr string) BlockHeaderStore {

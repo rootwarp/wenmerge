@@ -28,13 +28,6 @@ import (
 func TestRedisSet(t *testing.T) {
 	store := newRedisClient("localhost:6379")
 
-	// Connect
-	//rdb := redis.NewClient(&redis.Options{
-	//	Addr: "localhost:6379",
-	//})
-
-	//defer rdb.Close()
-
 	// Store
 	header := &types.Header{
 		Coinbase:   common.HexToAddress("12345"),
@@ -57,6 +50,20 @@ func TestRedisSet(t *testing.T) {
 	assert.Equal(t, header.Time, getHeader.Time)
 }
 
+func TestTotalDifficulty(t *testing.T) {
+	store := newRedisClient("localhost:6379")
+
+	ctx := context.Background()
+	err := store.SetTotalDifficulty(ctx, big.NewInt(1234), big.NewInt(4321))
+
+	assert.Nil(t, err)
+
+	readDifficulty, err := store.GetTotalDifficulty(ctx, big.NewInt(1234))
+
+	assert.Nil(t, err)
+	assert.Equal(t, "4321", readDifficulty.String())
+}
+
 func TestLatest(t *testing.T) {
 	store := newRedisClient("localhost:6379")
 
@@ -74,9 +81,7 @@ func TestLatest(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
-	})
+	rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
 	defer rdb.Close()
 
 	// Check latest block number value.
@@ -90,6 +95,19 @@ func TestLatest(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, header.Number.String(), recvHeader.Number.String())
+}
+
+func TestEmpty(t *testing.T) {
+	rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
+	defer rdb.Close()
+
+	ctx := context.Background()
+	cmd := rdb.Get(ctx, "no_key")
+
+	value, err := cmd.Result()
+
+	assert.Empty(t, value)
+	assert.NotNil(t, err)
 }
 
 func TestGob(t *testing.T) {
@@ -106,6 +124,7 @@ func TestGob(t *testing.T) {
 	assert.Nil(t, err)
 
 	newInfo, err := store.decode(hexStr)
+	assert.Nil(t, err)
 
 	assert.Equal(t, header.Number, newInfo.Number)
 	assert.Equal(t, header.Difficulty, newInfo.Difficulty)
