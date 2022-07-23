@@ -1,9 +1,10 @@
-module github.com/rootwarp/wenmerge
+module github.com/rootwarp/wenmerge-api
 
 go 1.18
 
 require (
 	github.com/ethereum/go-ethereum v1.10.19
+	github.com/go-redis/redis/v9 v9.0.0-beta.1
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/rs/zerolog v1.27.0
 	github.com/stretchr/testify v1.7.5
@@ -17,7 +18,6 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
-	github.com/go-redis/redis/v9 v9.0.0-beta.1 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect

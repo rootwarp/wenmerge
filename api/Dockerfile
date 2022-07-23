@@ -11,7 +11,7 @@ RUN GOOS=linux GOARCH=amd64 CGO_ENABLE=0 go build -ldflags '-extldflags "-static
 FROM alpine:3.16.0
 
 WORKDIR /app
-COPY --from=builder /app/wenmerge  ./
+COPY --from=builder /app/wenmerge-api  ./
 
 EXPOSE 9090
-CMD ["/app/wenmerge"]
+CMD ["/app/wenmerge-api"]
