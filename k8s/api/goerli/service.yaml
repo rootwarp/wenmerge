@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-wenmerge-api-goerli
+  namespace: wenmerge
+
+spec:
+  type: ClusterIP
+  selector:
+    app: wenmerge-api-goerli
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9090
