@@ -11,6 +11,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/go-redis/redis/v9"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -36,8 +37,11 @@ type redisReader struct {
 }
 
 func (r *redisReader) Latest(ctx context.Context) (*BlockHeader, error) {
+	log.Info().Str("module", "redis").Msg("latest")
+
 	blockNoStr, err := r.redisCli.Get(ctx, keyLatestBlockNo).Result()
 	if err != nil {
+		log.Error().Str("module", "redis").Msgf("err get latest block no. %+v", err)
 		return nil, err
 	}
 
@@ -68,18 +72,23 @@ func (r *redisReader) decode(encoded string) (*types.Header, error) {
 }
 
 func (r *redisReader) Get(ctx context.Context, blockNo *big.Int) (*BlockHeader, error) {
+	log.Info().Str("module", "redis").Msgf("get %s", blockNo.String())
+
 	encBlock, err := r.redisCli.Get(ctx, blockNo.String()).Result()
 	if err != nil {
+		log.Error().Str("module", "redis").Msgf("err get block: %+v", err)
 		return nil, err
 	}
 
 	header, err := r.decode(encBlock)
 	if err != nil {
+		log.Error().Str("module", "redis").Msgf("err decode: %+v", err)
 		return nil, err
 	}
 
 	totalDifficultyStr, err := r.redisCli.Get(ctx, "td_"+blockNo.String()).Result()
 	if err != nil {
+		log.Error().Str("module", "redis").Msgf("err get total difficulty: %+v", err)
 		return nil, err
 	}
 

@@ -51,18 +51,26 @@ func diffHandler(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "invalid target difficulty number format")
 	}
 
+	log.Info().Str("module", "main").Msgf("target difficulty %s", targetDifficulty.String())
+
 	ctx := c.Request().Context()
 	latestHeader, err := reader.Latest(ctx)
 	if err != nil {
+		log.Error().Str("module", "main").Msg(err.Error())
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	aheadHeaderNo := new(big.Int).Sub(latestHeader.Number, big.NewInt(500))
+	log.Info().Str("module", "main").Msgf("latest header %s", latestHeader.Number.String())
+
+	aheadHeaderNo := new(big.Int).Sub(latestHeader.Number, big.NewInt(100)) // TODO:
 
 	aheadHeader, err := reader.Get(ctx, aheadHeaderNo)
 	if err != nil {
+		log.Error().Str("module", "main").Msgf("get ahead header %+v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+
+	log.Info().Str("module", "main").Msgf("ahead header %s", aheadHeader.Number.String())
 
 	difficultyDiff := new(big.Int).Sub(latestHeader.TotalDifficulty, aheadHeader.TotalDifficulty)
 	diffBlockNo := new(big.Int).Sub(latestHeader.Number, aheadHeader.Number)
