@@ -80,7 +80,7 @@ func diffHandler(c echo.Context) error {
 	remainBlocks := new(big.Int).Div(ttdDistance, difficultyVelocity)
 
 	avgBlockSec := float64(latestHeader.Time-aheadHeader.Time) / float64(diffBlockNo.Int64())
-	expectTTDTime := time.Now().Add(time.Millisecond * time.Duration(avgBlockSec*1000))
+	expectTTDTime := time.Now().Add(time.Millisecond * time.Duration(avgBlockSec*1000*float64(remainBlocks.Int64())))
 
 	respBody := struct {
 		CurrentBlockNumber    *big.Int  `json:"current_block_number"`
