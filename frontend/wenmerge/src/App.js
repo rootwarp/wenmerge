@@ -10,7 +10,7 @@ function App() {
         <p className='app__from'>by DSRV</p>
         <a href='https://dsrvlabs.com' className='app__home_link'>> GO HOME</a>
       </div>
-      <BlockInfo title="GSF5 - goerli shadow fork" target_ttd="10625003" rpc="https://api-wenmerge-goerli.dsrvlabs.dev"></BlockInfo>
+      <BlockInfo title="MSF10 - Mainnet shasow fork" target_ttd="54772477605685202255872" rpc="https://api-wenmerge.dsrvlabs.dev"></BlockInfo>
       <BlockInfo title="goerli merge" target_ttd="10790000" rpc="https://api-wenmerge-goerli.dsrvlabs.dev"></BlockInfo>
     </div>
   );
