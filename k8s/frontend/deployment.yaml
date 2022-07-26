@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: backend
-        image: rootwarp/wenmerge-frontend:v0.6.1
+        image: rootwarp/wenmerge-frontend:v0.7.0
         ports:
         - containerPort: 3000
