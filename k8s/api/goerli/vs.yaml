@@ -12,5 +12,5 @@ spec:
   http:
   - route:
     - destination:
-        host: svc-wenmerge-goerli.wenmerge.svc.cluster.local
+        host: svc-wenmerge-api-goerli.wenmerge.svc.cluster.local
       weight: 100
